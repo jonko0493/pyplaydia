@@ -310,6 +310,7 @@ class JFIFFile():
                                 lnVal = lnAC & 0xF
                                 if lnVal <= 0:
                                     valAC = 0
+                                    unsignedAC = "{:016b}".format(valAC)[-lnVal:]
                                 else:
                                     valAC = buffer.readbits(lnVal)
                                     unsignedAC = "{:016b}".format(valAC)[-lnVal:]
