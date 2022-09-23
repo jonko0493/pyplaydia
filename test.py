@@ -1,8 +1,7 @@
 import sys
 from jpeg import JFIFFile
 from bitbuffer import BitBuffer
-from json import load
-from tqdm import tqdm
+import json
 from huffman import Huffman
 import numpy as np
 import random
@@ -10,7 +9,7 @@ from geneticalgorithm import geneticalgorithm as ga
 from PIL import Image, ImageChops
 
 with open("config.json", "r") as f:
-    config = load(f)
+    config = json.load(f)
 target = Image.open("input/test.jpg")
 image_index = 0
 
@@ -24,6 +23,7 @@ def parse_frame(inputfile, vals):
     filename = "output/test/index_{}.bmp".format(image_index)
     try:
         j.Decode(buffer, filename)
+        json.dump(config, open("output/test/index_{}_config.json".format(image_index), 'w'))
         return True
     except Exception as err:
         print(err)
@@ -57,16 +57,17 @@ def generate_dc_huffman_table_random_vals(id, size, lengths, codes):
 def randomize_ac_huffman_table_vals(config, vals):
     num_entries0 = len(config['DHT']['AC'][0]['Table'])
     for i in range(num_entries0):
-        config['DHT']['AC'][0]['Table'][i]['value'] = vals[i].astype(int)
-        config['DHT']['AC'][0]['Table'][i]['hex'] = "{:02X}".format(vals[i].astype(int))
+        config['DHT']['AC'][0]['Table'][i]['value'] = int(vals[i])
+        config['DHT']['AC'][0]['Table'][i]['hex'] = "{:02X}".format(int(vals[i]))
     num_entries1 = len(config['DHT']['AC'][0]['Table'])
     for i in range(num_entries1):
-        config['DHT']['AC'][1]['Table'][i]['value'] = vals[i + num_entries0].astype(int)
-        config['DHT']['AC'][1]['Table'][i]['hex'] = "{:02X}".format(vals[i + num_entries0].astype(int))
+        config['DHT']['AC'][1]['Table'][i]['value'] = int(vals[i + num_entries0])
+        config['DHT']['AC'][1]['Table'][i]['hex'] = "{:02X}".format(int(vals[i + num_entries0]))
 
 def parse_frame_comparison(vals):
     global image_index
-    if parse_frame("output/frame_0000.bin", vals):
+    casted_vals = vals.tolist()
+    if parse_frame("output/frame_0000.bin", casted_vals):
         parsed = Image.open("output/test/index_{}.bmp".format(image_index))
         image_index += 1
         comparison = compare_images(target, parsed)
